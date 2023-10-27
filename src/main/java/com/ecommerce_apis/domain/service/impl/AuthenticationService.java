@@ -1,16 +1,13 @@
 package com.ecommerce_apis.domain.service.impl;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
-
-import com.ecommerce_apis.domain.entities.Cart;
-import com.ecommerce_apis.domain.service.CartService;
+import com.ecommerce_apis.application.payloads.request.AuthenticationRequest;
+import com.ecommerce_apis.application.payloads.request.RegisterRequest;
+import com.ecommerce_apis.domain.entities.Role;
+import com.ecommerce_apis.domain.entities.User;
+import com.ecommerce_apis.domain.repositories.RoleCustomRepo;
+import com.ecommerce_apis.domain.repositories.UserRepository;
 import com.ecommerce_apis.domain.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,18 +15,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.ecommerce_apis.domain.entities.Role;
-import com.ecommerce_apis.domain.entities.User;
-import com.ecommerce_apis.application.payloads.request.AuthenticationRequest;
-import com.ecommerce_apis.application.payloads.response.AuthenticationResponse;
-import com.ecommerce_apis.application.payloads.request.RegisterRequest;
-import com.ecommerce_apis.domain.repositories.RoleCustomRepo;
-import com.ecommerce_apis.domain.repositories.UserRepository;
-
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -45,21 +34,18 @@ public class AuthenticationService {
 
     private RoleCustomRepo roleCustomRepo;
 
-    private final CartService cartService;
 
     @Autowired
     public AuthenticationService(UserRepository userRepository,
                                  JwtService jwtService,
                                  AuthenticationManager authenticationManager,
                                  UserService userService,
-                                 RoleCustomRepo roleCustomRepo,
-                                 CartService cartService) {
+                                 RoleCustomRepo roleCustomRepo) {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
         this.userService = userService;
         this.roleCustomRepo = roleCustomRepo;
-        this.cartService = cartService;
     }
 
     public ResponseEntity<?> register(RegisterRequest registerRequest) {
@@ -78,7 +64,7 @@ public class AuthenticationService {
             );
             userService.saveUser(user);
 
-            Cart cart = cartService.createCart(user);
+//            Cart cart = cartService.createCart(user);
 
             userService.addToUser(registerRequest.getEmail(), "ROLE_USER"); // Default role
 
@@ -92,7 +78,7 @@ public class AuthenticationService {
         }
     }
 
-    public ResponseEntity<?> authenticate(AuthenticationRequest authenticationRequest) {
+    public Map<String, Object> authenticate(AuthenticationRequest authenticationRequest) {
         try {
             User user = userRepository.findByEmail(authenticationRequest.getEmail());
             if (user == null) {
@@ -119,21 +105,41 @@ public class AuthenticationService {
             }
 
             String jwtAccessToken = jwtService.generateToken(user, authorities);
-            String jwtRefreshToken = jwtService.generateRefreshToken(user, authorities);
 
-            return ResponseEntity.ok(AuthenticationResponse.builder()
-                    .access_token(jwtAccessToken)
-                    .refresh_token(jwtRefreshToken)
-                    .email(user.getEmail())
-                    .build());
+            return getStringObjectMap(jwtAccessToken, user);
         } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("statusCode", "NOT_FOUND");
+            errorResponse.put("statusCodeValue", 404);
+            errorResponse.put("error", e.getMessage());
+            return errorResponse;
         } catch (BadCredentialsException e) {
-            return ResponseEntity.badRequest().body("Invalid Credential");
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("statusCode", "BAD_REQUEST");
+            errorResponse.put("statusCodeValue", 400);
+            errorResponse.put("error", "Invalid Credential");
+            return errorResponse;
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong");
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("statusCode", "INTERNAL_SERVER_ERROR");
+            errorResponse.put("statusCodeValue", 500);
+            errorResponse.put("error", "Something went wrong");
+            return errorResponse;
         }
     }
 
+    private static Map<String, Object> getStringObjectMap(String jwtAccessToken, User user) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("access_token", jwtAccessToken);
+        Map<String, Object> userMap = new HashMap<>();
+        userMap.put("userId", user.getUser_id());
+        userMap.put("username", user.getUsername());
+        userMap.put("avatar", user.getAvartar());
+        userMap.put("email", user.getEmail());
+        response.put("user", userMap);
+        response.put("statusCode", "OK");
+        response.put("statusCodeValue", 200);
+        return response;
+    }
 
 }

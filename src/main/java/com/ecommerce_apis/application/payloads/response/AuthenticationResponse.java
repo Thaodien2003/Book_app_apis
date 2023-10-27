@@ -12,9 +12,8 @@ import lombok.Setter;
 @Getter
 @Builder
 public class AuthenticationResponse {
-
     private String access_token;
-    private String refresh_token;
     private String email;
-
+    private String statusCode;
+    private int statusCodeValue;
 }

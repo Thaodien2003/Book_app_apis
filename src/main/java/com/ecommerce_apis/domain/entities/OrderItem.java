@@ -40,7 +40,7 @@ public class OrderItem {
 	
 	private Integer discountedPrice;
 	
-	private Long userId;
+	private String userId;
 	
 	private LocalDateTime deliveryDate;
 	

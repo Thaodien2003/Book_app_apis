@@ -1,7 +1,9 @@
 package com.ecommerce_apis.domain.entities;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -31,9 +33,9 @@ public class Order {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	
+
 	@Column(name = "order_id")
-	private String orderId;
+	private String orderId = new Date().getTime() + "-" + new SecureRandom().nextInt(1000);
 	
 	@ManyToOne
 	private User user;

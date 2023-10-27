@@ -31,7 +31,7 @@ public class AccountImpl implements AccountService {
     }
 
     @Override
-    public String forgotPassword(String email) {
+    public void forgotPassword(String email) {
         User user = this.userRepository.findByEmail(email);
         if(user == null) {
             throw new RuntimeException("User not found with email - "+email);
@@ -46,7 +46,6 @@ public class AccountImpl implements AccountService {
             throw new RuntimeException("Unable to send set password email please try again");
         }
 
-        return "Please check your email to set new password";
     }
 
     @Override
@@ -67,7 +66,7 @@ public class AccountImpl implements AccountService {
     }
 
     @Override
-    public String regenerateOtp(String email) {
+    public void regenerateOtp(String email) {
         User user = this.userRepository.findByEmail(email);
         if(user == null) {
             throw new RuntimeException("User not found with email - "+email);
@@ -82,6 +81,5 @@ public class AccountImpl implements AccountService {
             throw new RuntimeException("An error occurred while sending the otp code, please try again");
         }
 
-        return "Check the otp code sent to your email";
     }
 }

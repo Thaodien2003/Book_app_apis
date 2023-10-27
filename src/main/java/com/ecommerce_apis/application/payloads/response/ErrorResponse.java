@@ -18,10 +18,6 @@ public class ErrorResponse {
         this.errorMessage = errorMessage;
     }
 
-    public ErrorResponse(String errorMessage){
-        this.errorMessage = errorMessage;
-    }
-
     public int getStatusCodeValue(){
         return statusCode.value();
     }

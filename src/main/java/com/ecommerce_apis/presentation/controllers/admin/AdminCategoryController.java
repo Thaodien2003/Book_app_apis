@@ -29,14 +29,14 @@ public class AdminCategoryController {
         this.fileService = fileService;
     }
 
-    //create categoty
+    //admin create categoty
     @PostMapping("/create")
     public ResponseEntity<CategoryDTO> createCategory(@RequestBody CategoryDTO categoryDTO) {
         CategoryDTO createCategory = this.categoryService.createCategory(categoryDTO);
         return new ResponseEntity<>(createCategory, HttpStatus.CREATED);
     }
 
-    //update category
+    //admin update category
     @PutMapping("/update/{catId}")
     public ResponseEntity<CategoryDTO> updateCategoryDTOResponseEntity(@RequestBody CategoryDTO categoryDTO,
                                                                        @PathVariable Long catId) {
@@ -59,7 +59,7 @@ public class AdminCategoryController {
         return new ResponseEntity<>(update, HttpStatus.OK);
     }
 
-    //delete category
+    //admin delete category
     @DeleteMapping("/delete/{catId}")
     public ResponseEntity<ApiResponse> deleteCategory(@PathVariable Long catId) {
         try {

@@ -17,6 +17,7 @@ public class AccountController {
         this.accountService = accountService;
     }
 
+    //forgot password
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestParam("email") String email) {
         try {
@@ -27,6 +28,7 @@ public class AccountController {
         }
     }
 
+    //generate otp
     @PostMapping("/regenerate-otp")
     public ResponseEntity<String> regenerateOtp(@RequestParam("email") String email) {
         try {
@@ -37,6 +39,7 @@ public class AccountController {
         }
     }
 
+    //set password
     @PostMapping("/set-password")
     public ResponseEntity<String> changePassword(@RequestParam("email") String email,
                                                  @RequestHeader("otp") String otp,

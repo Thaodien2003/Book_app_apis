@@ -1,9 +1,8 @@
 package com.ecommerce_apis.presentation.controllers.inventory;
 
 import com.ecommerce_apis.application.payloads.response.ProductResponse;
-import com.ecommerce_apis.domain.entities.Product;
-import com.ecommerce_apis.domain.service.ProductService;
 import com.ecommerce_apis.application.utils.Constants;
+import com.ecommerce_apis.domain.service.ProductService;
 import com.ecommerce_apis.presentation.dtos.ProductDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +32,7 @@ public class ProductController {
     }
 
 
+    //search product
     @GetMapping("/search/{keywords}")
     public ResponseEntity<List<ProductDTO>> searchByTitle(
             @PathVariable("keywords") String keywords) {

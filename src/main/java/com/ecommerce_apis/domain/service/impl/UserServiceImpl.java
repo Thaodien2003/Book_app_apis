@@ -109,7 +109,6 @@ public class UserServiceImpl implements UserService {
 
         existingUser.setUsername(userDTO.getUsername());
         existingUser.setEmail(userDTO.getEmail());
-        existingUser.setAvartar(userDTO.getAvartar());
         existingUser.setUpdatedAt(LocalDateTime.now());
 
         User update = this.userRepository.save(existingUser);
