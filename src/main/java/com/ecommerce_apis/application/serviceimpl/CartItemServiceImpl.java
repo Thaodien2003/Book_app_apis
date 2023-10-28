@@ -1,4 +1,4 @@
-package com.ecommerce_apis.domain.service.impl;
+package com.ecommerce_apis.application.serviceimpl;
 
 import com.ecommerce_apis.domain.entities.Cart;
 import com.ecommerce_apis.domain.entities.CartItem;
@@ -6,7 +6,7 @@ import com.ecommerce_apis.domain.entities.Product;
 import com.ecommerce_apis.domain.entities.User;
 import com.ecommerce_apis.domain.exceptions.ResourceNotFoundException;
 import com.ecommerce_apis.domain.exceptions.UserException;
-import com.ecommerce_apis.domain.repositories.CartItemRepository;
+import com.ecommerce_apis.infrastructure.repositories.CartItemRepository;
 import com.ecommerce_apis.domain.service.CartItemService;
 import com.ecommerce_apis.domain.service.UserService;
 import org.springframework.stereotype.Service;

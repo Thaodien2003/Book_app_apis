@@ -1,10 +1,10 @@
-package com.ecommerce_apis.domain.service.impl;
+package com.ecommerce_apis.application.serviceimpl;
 
 import com.ecommerce_apis.domain.service.AccountService;
 import com.ecommerce_apis.application.utils.EmailUtil;
 import com.ecommerce_apis.application.utils.OtpUtil;
 import com.ecommerce_apis.domain.entities.User;
-import com.ecommerce_apis.domain.repositories.UserRepository;
+import com.ecommerce_apis.infrastructure.repositories.UserRepository;
 import jakarta.mail.MessagingException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

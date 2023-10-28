@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ecommerce_apis.application.payloads.request.AuthenticationRequest;
 import com.ecommerce_apis.application.payloads.request.RegisterRequest;
-import com.ecommerce_apis.domain.service.impl.AuthenticationService;
+import com.ecommerce_apis.application.serviceimpl.AuthenticationService;
 
 import java.util.HashMap;
 import java.util.Map;

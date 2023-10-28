@@ -1,14 +1,12 @@
-package com.ecommerce_apis.domain.service.impl;
+package com.ecommerce_apis.application.serviceimpl;
 
-import com.ecommerce_apis.domain.entities.Cart;
-import com.ecommerce_apis.domain.service.CartService;
 import com.ecommerce_apis.presentation.dtos.UserDTO;
 import com.ecommerce_apis.domain.service.UserService;
 import com.ecommerce_apis.domain.entities.Role;
 import com.ecommerce_apis.domain.entities.User;
 import com.ecommerce_apis.domain.exceptions.UserException;
-import com.ecommerce_apis.domain.repositories.RoleRepository;
-import com.ecommerce_apis.domain.repositories.UserRepository;
+import com.ecommerce_apis.infrastructure.repositories.RoleRepository;
+import com.ecommerce_apis.infrastructure.repositories.UserRepository;
 import com.ecommerce_apis.infrastructure.gateways.UserMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

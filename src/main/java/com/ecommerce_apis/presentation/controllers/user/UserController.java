@@ -6,7 +6,7 @@ import com.ecommerce_apis.application.payloads.request.ReviewRequest;
 import com.ecommerce_apis.application.payloads.response.ApiResponse;
 import com.ecommerce_apis.domain.entities.*;
 import com.ecommerce_apis.domain.exceptions.UserException;
-import com.ecommerce_apis.domain.repositories.UserRepository;
+import com.ecommerce_apis.infrastructure.repositories.UserRepository;
 import com.ecommerce_apis.domain.service.*;
 import com.ecommerce_apis.infrastructure.gateways.CartMapper;
 import com.ecommerce_apis.infrastructure.gateways.UserMapper;

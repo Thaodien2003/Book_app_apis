@@ -1,11 +1,11 @@
-package com.ecommerce_apis.domain.service.impl;
+package com.ecommerce_apis.application.serviceimpl;
 
 import com.ecommerce_apis.domain.entities.*;
 import com.ecommerce_apis.domain.exceptions.ResourceNotFoundException;
-import com.ecommerce_apis.domain.repositories.AddressRepository;
-import com.ecommerce_apis.domain.repositories.OrderItemRepository;
-import com.ecommerce_apis.domain.repositories.OrderRepository;
-import com.ecommerce_apis.domain.repositories.UserRepository;
+import com.ecommerce_apis.infrastructure.repositories.AddressRepository;
+import com.ecommerce_apis.infrastructure.repositories.OrderItemRepository;
+import com.ecommerce_apis.infrastructure.repositories.OrderRepository;
+import com.ecommerce_apis.infrastructure.repositories.UserRepository;
 import com.ecommerce_apis.domain.service.CartService;
 import com.ecommerce_apis.domain.service.OrderService;
 import org.springframework.stereotype.Service;

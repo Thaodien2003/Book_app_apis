@@ -1,11 +1,11 @@
-package com.ecommerce_apis.domain.service.impl;
+package com.ecommerce_apis.application.serviceimpl;
 
 import com.ecommerce_apis.application.payloads.request.AuthenticationRequest;
 import com.ecommerce_apis.application.payloads.request.RegisterRequest;
 import com.ecommerce_apis.domain.entities.Role;
 import com.ecommerce_apis.domain.entities.User;
-import com.ecommerce_apis.domain.repositories.RoleCustomRepo;
-import com.ecommerce_apis.domain.repositories.UserRepository;
+import com.ecommerce_apis.infrastructure.repositories.RoleCustomRepo;
+import com.ecommerce_apis.infrastructure.repositories.UserRepository;
 import com.ecommerce_apis.domain.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

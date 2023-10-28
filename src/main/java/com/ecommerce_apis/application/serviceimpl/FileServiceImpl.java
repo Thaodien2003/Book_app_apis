@@ -1,4 +1,4 @@
-package com.ecommerce_apis.domain.service.impl;
+package com.ecommerce_apis.application.serviceimpl;
 
 import com.ecommerce_apis.domain.service.FileService;
 import org.springframework.stereotype.Service;

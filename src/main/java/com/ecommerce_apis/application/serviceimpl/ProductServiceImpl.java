@@ -1,4 +1,4 @@
-package com.ecommerce_apis.domain.service.impl;
+package com.ecommerce_apis.application.serviceimpl;
 
 import com.ecommerce_apis.presentation.dtos.ProductDTO;
 import com.ecommerce_apis.application.payloads.response.ProductResponse;
@@ -6,8 +6,8 @@ import com.ecommerce_apis.domain.service.ProductService;
 import com.ecommerce_apis.domain.entities.Category;
 import com.ecommerce_apis.domain.entities.Product;
 import com.ecommerce_apis.domain.exceptions.ResourceNotFoundException;
-import com.ecommerce_apis.domain.repositories.CategoryRepository;
-import com.ecommerce_apis.domain.repositories.ProductRepository;
+import com.ecommerce_apis.infrastructure.repositories.CategoryRepository;
+import com.ecommerce_apis.infrastructure.repositories.ProductRepository;
 import com.ecommerce_apis.infrastructure.gateways.ProductMapper;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;

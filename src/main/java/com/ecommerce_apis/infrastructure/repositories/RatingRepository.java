@@ -1,4 +1,4 @@
-package com.ecommerce_apis.domain.repositories;
+package com.ecommerce_apis.infrastructure.repositories;
 
 import com.ecommerce_apis.domain.entities.Rating;
 import org.springframework.data.jpa.repository.JpaRepository;

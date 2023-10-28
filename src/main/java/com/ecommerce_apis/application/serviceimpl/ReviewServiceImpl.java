@@ -1,12 +1,12 @@
-package com.ecommerce_apis.domain.service.impl;
+package com.ecommerce_apis.application.serviceimpl;
 
 import com.ecommerce_apis.application.payloads.request.ReviewRequest;
 import com.ecommerce_apis.domain.entities.Product;
 import com.ecommerce_apis.domain.entities.Review;
 import com.ecommerce_apis.domain.entities.User;
 import com.ecommerce_apis.domain.exceptions.ResourceNotFoundException;
-import com.ecommerce_apis.domain.repositories.ProductRepository;
-import com.ecommerce_apis.domain.repositories.ReviewRepository;
+import com.ecommerce_apis.infrastructure.repositories.ProductRepository;
+import com.ecommerce_apis.infrastructure.repositories.ReviewRepository;
 import com.ecommerce_apis.domain.service.ReviewService;
 import org.springframework.stereotype.Service;
 

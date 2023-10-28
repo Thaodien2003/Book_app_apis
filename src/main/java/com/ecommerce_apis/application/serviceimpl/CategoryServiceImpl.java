@@ -1,10 +1,10 @@
-package com.ecommerce_apis.domain.service.impl;
+package com.ecommerce_apis.application.serviceimpl;
 
 import com.ecommerce_apis.presentation.dtos.CategoryDTO;
 import com.ecommerce_apis.domain.service.CategoryService;
 import com.ecommerce_apis.domain.entities.Category;
 import com.ecommerce_apis.domain.exceptions.ResourceNotFoundException;
-import com.ecommerce_apis.domain.repositories.CategoryRepository;
+import com.ecommerce_apis.infrastructure.repositories.CategoryRepository;
 import com.ecommerce_apis.infrastructure.gateways.CategoryMapper;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package com.ecommerce_apis.domain.service.impl;
+package com.ecommerce_apis.application.serviceimpl;
 
 import java.util.Collection;
 import java.util.Date;

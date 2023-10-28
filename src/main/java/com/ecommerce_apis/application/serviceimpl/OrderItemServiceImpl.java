@@ -1,7 +1,7 @@
-package com.ecommerce_apis.domain.service.impl;
+package com.ecommerce_apis.application.serviceimpl;
 
 import com.ecommerce_apis.domain.entities.OrderItem;
-import com.ecommerce_apis.domain.repositories.OrderItemRepository;
+import com.ecommerce_apis.infrastructure.repositories.OrderItemRepository;
 import com.ecommerce_apis.domain.service.OrderItemService;
 import org.springframework.stereotype.Service;
 
