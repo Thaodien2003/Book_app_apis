@@ -4,6 +4,7 @@ import com.ecommerce_apis.application.payloads.response.ProductResponse;
 import com.ecommerce_apis.application.utils.Constants;
 import com.ecommerce_apis.domain.service.ProductService;
 import com.ecommerce_apis.presentation.dtos.ProductDTO;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +32,21 @@ public class ProductController {
         return new ResponseEntity<>(allProduct, HttpStatus.OK);
     }
 
+    //filter product
+    @GetMapping("/filter-product")
+    public ResponseEntity<Page<ProductDTO>> getFilterProduct(
+            @RequestParam String category,
+            @RequestParam List<String> color, @RequestParam List<String> size, @RequestParam Integer minPrice,
+            @RequestParam Integer maxPrice, @RequestParam Integer minDiscount, @RequestParam String stock,
+            @RequestParam(value = "pageNumber", defaultValue = Constants.PAGE_NUMBER, required = false) Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = Constants.PAGE_SIZE, required = false) Integer pageSize,
+            @RequestParam String sort
+    ) {
+        Page<ProductDTO> productDTOS = this.productService.getFilterProduct(category, color, size, minPrice, maxPrice,
+                                                                            minDiscount, sort, stock, pageNumber, pageSize);
+        System.out.println("Complete Product");
+        return new ResponseEntity<>(productDTOS, HttpStatus.OK);
+    }
 
     //search product
     @GetMapping("/search/{keywords}")
@@ -46,4 +62,5 @@ public class ProductController {
         List<ProductDTO> products = this.productService.findProductByCategory(categoryId);
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
+
 }

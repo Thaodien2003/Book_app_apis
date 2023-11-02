@@ -49,7 +49,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public String addCartItem(String userId, CartItemRequest request) {
+    public void addCartItem(String userId, CartItemRequest request) {
         // Tìm User theo userId
         User user = this.userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User with id" +userId+ "not found"));
@@ -88,7 +88,6 @@ public class CartServiceImpl implements CartService {
             // Lưu Cart lại vào cơ sở dữ liệu
             this.cartRepository.save(cart);
         }
-        return "Item added to cart";
     }
 
 

@@ -2,6 +2,7 @@ package com.ecommerce_apis.domain.service;
 
 import com.ecommerce_apis.presentation.dtos.ProductDTO;
 import com.ecommerce_apis.application.payloads.response.ProductResponse;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -32,4 +33,10 @@ public interface ProductService {
 
     //upadte image product
     ProductDTO updateImageProduct(ProductDTO productDTO, Long productId);
+
+    //filter product
+    Page<ProductDTO> getFilterProduct(
+            String category, List<String> colors, List<String> sizes,
+            Integer minPrice, Integer maxPrice, Integer minDiscount,
+            String sortDir, String stock, Integer pageNumber, Integer pageSize);
 }

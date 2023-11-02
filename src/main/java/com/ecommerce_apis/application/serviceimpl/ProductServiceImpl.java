@@ -146,4 +146,43 @@ public class ProductServiceImpl implements ProductService {
 
         return this.productMapper.convertToDTO(updateImageProduct);
     }
+
+    @Override
+    public Page<ProductDTO> getFilterProduct(String category, List<String> colors, List<String> sizes,
+                                             Integer minPrice, Integer maxPrice, Integer minDiscount, String sortDir,
+                                             String stock, Integer pageNumber, Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        List<Product> products = this.productRepository.
+                filterProducts(category, minPrice, maxPrice, minDiscount, sortDir);
+
+        if(!colors.isEmpty()) {
+            products = products.stream().filter(product -> colors.stream().anyMatch(
+                    c -> c.equalsIgnoreCase(product.getColor())
+            )).collect(Collectors.toList());
+        }
+
+        if(stock != null) {
+            if(stock.equals("in-stock")) {
+                products = products.stream().filter(product -> product.getQuantity() > 0)
+                        .collect(Collectors.toList());
+            } else if(stock.equals("out-of-stock")) {
+                products = products.stream().filter(product -> product.getQuantity() < 1)
+                        .collect(Collectors.toList());
+            }
+        }
+
+        int totalProducts = products.size();
+        int startIndex = (int) pageable.getOffset();
+        int endIndex = Math.min(startIndex + pageable.getPageSize(), products.size());
+
+        List<Product> pageContent = products.subList(startIndex, endIndex);
+
+        List<ProductDTO> productDTOs = pageContent.stream().map(this.productMapper::convertToDTO)
+                .collect(Collectors.toList());
+
+//        Page<Product> filterdProduct = new PageImpl<>(pageContent, pageable, products.size());
+
+        return new PageImpl<>(productDTOs, pageable, totalProducts);
+    }
 }

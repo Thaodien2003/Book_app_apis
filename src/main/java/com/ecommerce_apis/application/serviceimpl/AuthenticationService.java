@@ -64,8 +64,6 @@ public class AuthenticationService {
             );
             userService.saveUser(user);
 
-//            Cart cart = cartService.createCart(user);
-
             userService.addToUser(registerRequest.getEmail(), "ROLE_USER"); // Default role
 
             User savedUser = userRepository.findByEmail(registerRequest.getEmail());
@@ -105,6 +103,9 @@ public class AuthenticationService {
             }
 
             String jwtAccessToken = jwtService.generateToken(user, authorities);
+
+            user.setToken(jwtAccessToken);
+            userRepository.save(user);
 
             return getStringObjectMap(jwtAccessToken, user);
         } catch (NoSuchElementException e) {

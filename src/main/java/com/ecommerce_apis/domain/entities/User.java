@@ -42,6 +42,10 @@ public class User implements UserDetails {
 
     private LocalDateTime otpGeneratedTime;
 
+    private String token;
+
+    private LocalDateTime tokenGeneratedTime;
+
     @ManyToMany
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "User_id"),
@@ -117,6 +121,4 @@ public class User implements UserDetails {
         this.roles = roles;
         this.createdAt = createdAt;
     }
-
-
 }

@@ -24,7 +24,7 @@ public class JwtService {
     public String generateToken(User user, Collection<SimpleGrantedAuthority> authorities) {
         return Jwts.builder()
                 .setSubject(user.getEmail())
-                .setExpiration(new Date(System.currentTimeMillis() + 14 * 24 * 60 * 60 * 1000))
+                .setExpiration(new Date(System.currentTimeMillis() + 60 * 1000))
                 .claim("roles", authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .signWith(key).compact();
     }

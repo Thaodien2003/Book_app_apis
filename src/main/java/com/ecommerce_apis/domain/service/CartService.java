@@ -10,7 +10,7 @@ public interface CartService {
     Cart createCart(User user);
 
     //add cartitem
-    String addCartItem(String userId, CartItemRequest request);
+    void addCartItem(String userId, CartItemRequest request);
 
     //get cart by user
     Cart findUserCart(String userId);
