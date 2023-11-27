@@ -58,6 +58,7 @@ public class Role {
     @Fetch(value = FetchMode.SELECT)
     @JsonIgnore
     private Set<User> user=new HashSet<>();
+
     public Role(Long id,String name,String description){
         this.id=id;
         this.name=name;

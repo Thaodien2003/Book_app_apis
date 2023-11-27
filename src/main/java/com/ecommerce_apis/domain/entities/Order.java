@@ -6,17 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,13 +29,20 @@ public class Order {
 	
 	@ManyToOne
 	private User user;
+
+	@ManyToOne
+	private User shipper;
 	
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
 	private List<OrderItem> orderItems = new ArrayList<>();
 	
 	private LocalDateTime orderDate;
-	
-	private LocalDateTime deliveryDate;
+
+	private LocalDateTime placedOrderDate;
+
+	private LocalDateTime shippedOrderDate;
+
+	private LocalDateTime successDeliveryDate;
 	
 	@OneToOne
 	private Address shippingAddress;
@@ -62,6 +59,8 @@ public class Order {
 	private String orderStatus;
 	
 	private int totalItem;
+
+	private boolean deleted;
 	
 	private LocalDateTime ceatedAt;
 

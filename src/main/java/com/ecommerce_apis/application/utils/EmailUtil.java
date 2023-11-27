@@ -15,13 +15,14 @@ public class EmailUtil {
         this.javaMailSender = javaMailSender;
     }
 
-    public void sendSetPassword(String email, String otp) throws MessagingException {
+    public void sendEmail(String email, String otp) throws MessagingException {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
         mimeMessageHelper.setTo(email);
-        mimeMessageHelper.setSubject("Set password");
+        mimeMessageHelper.setSubject("OTP CODE");
         mimeMessageHelper.setText(String.format("OTP: %s", otp), true);
 
         javaMailSender.send(mimeMessage);
     }
+
 }

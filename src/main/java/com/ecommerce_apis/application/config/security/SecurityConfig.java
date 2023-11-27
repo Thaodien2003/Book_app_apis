@@ -40,9 +40,12 @@ public class SecurityConfig {
 						"/api/auth/**",
 						"/api/user/avartar/{avartarName}",
 						"/api/account/**",
-						"/api/product/**").permitAll()
-				.requestMatchers("/api/admin/**").hasAnyAuthority("ROLE_ADMIN")
+						"/api/product/**",
+						"/api/payment/**").permitAll()
+				.requestMatchers("/api/seller/**").hasAnyAuthority("ROLE_SELLER")
 				.requestMatchers("/api/user/**").hasAnyAuthority("ROLE_USER")
+				.requestMatchers("/api/admin/**").hasAnyAuthority("ROLE_ADMIN")
+				.requestMatchers("/api/shipper/**").hasAnyAuthority("ROLE_SHIPPER")
 				.anyRequest()
 				.authenticated())
 		.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -16,6 +16,6 @@ public interface RoleCustomRepo extends JpaRepository<User, String> {
             + "FROM users u "
             + "JOIN user_role ur ON u.user_id=ur.user_id "
             + "JOIN roles r ON r.id = ur.role_id "
-            + "WHERE (:email is null or u.email=:email)", nativeQuery = true)
+            + "WHERE (:email IS NULL OR u.email=:email)", nativeQuery = true)
     List<Role> getRole(@Param("email") String email);
 }

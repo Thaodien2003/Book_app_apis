@@ -9,14 +9,15 @@ import com.ecommerce_apis.domain.exceptions.UserException;
 import com.ecommerce_apis.infrastructure.repositories.CartItemRepository;
 import com.ecommerce_apis.domain.service.CartItemService;
 import com.ecommerce_apis.domain.service.UserService;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CartItemServiceImpl implements CartItemService {
 
     private final CartItemRepository cartItemRepository;
-
     protected final UserService userService;
+    private static final Logger logger = Logger.getLogger(CartItemServiceImpl.class);
 
     public CartItemServiceImpl(CartItemRepository cartItemRepository, UserService userService) {
         this.cartItemRepository = cartItemRepository;
@@ -25,50 +26,73 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public CartItem createCartItem(CartItem cartItem) {
-        cartItem.setQuantity(1);
-        cartItem.setPrice(cartItem.getProduct().getPrice()* cartItem.getQuantity());
-        cartItem.setDiscountedPrice(cartItem.getProduct().getDiscountedPrice());
+        try {
+            cartItem.setQuantity(1);
+            cartItem.setPrice(cartItem.getProduct().getPrice() * cartItem.getQuantity());
+            cartItem.setDiscountedPrice(cartItem.getProduct().getDiscountedPrice());
 
-        return this.cartItemRepository.save(cartItem);
+            return this.cartItemRepository.save(cartItem);
+        } catch (Exception e) {
+            logger.error("Failed to create cart item: {}" + e.getMessage());
+            throw e;
+        }
     }
 
     @Override
     public CartItem updateCartItem(String userId, Long id, CartItem cartItem) throws UserException {
-        CartItem item = findCartItemById(id);
-        User user = this.userService.findUserById(item.getUserId());
+        try {
+            CartItem item = findCartItemById(id);
+            User user = this.userService.findUserById(item.getUserId());
 
-        if(user.getUser_id().equals(userId)) {
-            item.setQuantity(cartItem.getQuantity());
-            item.setPrice(item.getQuantity()*item.getProduct().getPrice());
-            item.setDiscountedPrice(item.getProduct().getDiscountedPrice());
+            if (user.getUser_id().equals(userId)) {
+                item.setQuantity(cartItem.getQuantity());
+                item.setPrice(item.getQuantity() * item.getProduct().getPrice());
+                item.setDiscountedPrice(item.getProduct().getDiscountedPrice());
+            }
+
+            return this.cartItemRepository.save(item);
+        } catch (Exception e) {
+            logger.error("Failed to update cart item: {}" + e.getMessage());
+            throw e;
         }
-
-        return this.cartItemRepository.save(item);
     }
 
     @Override
     public CartItem isCartItemExist(Cart cart, Product product, String size, String userId) {
-        return this.cartItemRepository.isCartItemExist(cart, product, size, userId);
+        try {
+            return this.cartItemRepository.isCartItemExist(cart, product, size, userId);
+        } catch (Exception e) {
+            logger.error("Failed to check if cart item exists: {}" + e.getMessage());
+            throw e;
+        }
     }
 
     @Override
     public void removedCartItem(String userId, Long cartItemId) throws UserException {
-        CartItem cartItem = findCartItemById(cartItemId);
-        User user = this.userService.findUserById(cartItem.getUserId());
+        try {
+            CartItem cartItem = findCartItemById(cartItemId);
+            User user = this.userService.findUserById(cartItem.getUserId());
+            User requestUser = this.userService.findUserById(userId);
 
-        User requestUser = this.userService.findUserById(userId);
-
-        if(user.getUser_id().equals(requestUser.getUser_id())) {
-            this.cartItemRepository.deleteById(cartItemId);
-        } else {
-            throw new UserException("You can not removed another users item");
+            if (user.getUser_id().equals(requestUser.getUser_id())) {
+                this.cartItemRepository.deleteById(cartItemId);
+            } else {
+                throw new UserException("You cannot remove another user's item");
+            }
+        } catch (Exception e) {
+            logger.error("Failed to remove cart item: {}" + e.getMessage());
+            throw e;
         }
     }
 
     @Override
     public CartItem findCartItemById(Long cartIteId) {
-
-        return this.cartItemRepository.findById(cartIteId)
-                .orElseThrow(() -> new ResourceNotFoundException("CartItem", "CartItem id",cartIteId));
+        try {
+            return this.cartItemRepository.findById(cartIteId)
+                    .orElseThrow(() -> new ResourceNotFoundException("CartItem", "CartItem id", cartIteId));
+        } catch (Exception e) {
+            logger.error("Failed to find cart item by id: {}" + e.getMessage());
+            throw e;
+        }
     }
 }

@@ -17,4 +17,6 @@ public interface UserService {
 	User getProfileUser(String jwt) throws UserException;
 
 	UserDTO updateUser(UserDTO userDTO, String userId) throws  UserException;
+
+	void deletedUser(String userId) throws UserException;
 }

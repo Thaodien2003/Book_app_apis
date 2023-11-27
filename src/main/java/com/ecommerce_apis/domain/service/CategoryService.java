@@ -1,5 +1,6 @@
 package com.ecommerce_apis.domain.service;
 
+import com.ecommerce_apis.domain.exceptions.UserException;
 import com.ecommerce_apis.presentation.dtos.CategoryDTO;
 
 import java.util.List;

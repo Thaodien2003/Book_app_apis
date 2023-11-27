@@ -26,4 +26,5 @@ public class ProductDTO {
     private Set<Size> size = new HashSet<>();
     private String imageUrl;
     private CategoryDTO category;
+    private UserDTO seller;
 }

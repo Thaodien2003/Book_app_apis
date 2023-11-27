@@ -24,54 +24,46 @@ public class AdminCategoryController {
     private final FileService fileService;
 
     public AdminCategoryController(CategoryService categoryService,
-                              FileService fileService) {
+                                   FileService fileService) {
         this.categoryService = categoryService;
         this.fileService = fileService;
     }
 
     //admin create categoty
-    @PostMapping("/create")
+    @PostMapping("/categories/create")
     public ResponseEntity<CategoryDTO> createCategory(@RequestBody CategoryDTO categoryDTO) {
         CategoryDTO createCategory = this.categoryService.createCategory(categoryDTO);
         return new ResponseEntity<>(createCategory, HttpStatus.CREATED);
     }
 
     //admin update category
-    @PutMapping("/update/{catId}")
+    @PutMapping("/categories/update/{catId}")
     public ResponseEntity<CategoryDTO> updateCategoryDTOResponseEntity(@RequestBody CategoryDTO categoryDTO,
                                                                        @PathVariable Long catId) {
-        CategoryDTO updateCategory = this.categoryService.updateCategory(categoryDTO, catId);
-        return new ResponseEntity<>(updateCategory, HttpStatus.CREATED);
+
+            CategoryDTO updateCategory = this.categoryService.updateCategory(categoryDTO, catId);
+            return new ResponseEntity<>(updateCategory, HttpStatus.OK);
     }
 
     //upload image category
-    @PostMapping("/image/upload/{catId}")
+    @PostMapping("/categories/image/upload/{catId}")
     public ResponseEntity<CategoryDTO> uploadImage(@RequestParam("image") MultipartFile image,
                                                    @PathVariable Long catId) throws IOException {
-
         CategoryDTO categoryDTO = this.categoryService.getCategoryId(catId);
         String fileName = this.fileService.uploadImage(path, image);
 
         categoryDTO.setCategoryImage(fileName);
 
         CategoryDTO update = this.categoryService.updateImageCategory(categoryDTO, catId);
-
         return new ResponseEntity<>(update, HttpStatus.OK);
     }
 
     //admin delete category
-    @DeleteMapping("/delete/{catId}")
+    @DeleteMapping("/categories/delete/{catId}")
     public ResponseEntity<ApiResponse> deleteCategory(@PathVariable Long catId) {
-        try {
             this.categoryService.deleteCategory(catId);
             return new ResponseEntity<>(new
                     ApiResponse("Category is Deleted Successfully", true),
                     HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ApiResponse("Category is Deleted Failed", false),
-                    HttpStatus.OK);
-        }
     }
-
-
 }

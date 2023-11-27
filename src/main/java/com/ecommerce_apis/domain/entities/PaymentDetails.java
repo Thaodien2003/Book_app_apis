@@ -17,10 +17,10 @@ public class PaymentDetails {
 
 	private String paymentId;
 
-	private String zalopayPaymentId;
+	private String vnpayPaymentId;
 
-	private String zalopayPaymentUrl;
+	private String vnpayPaymentUrl;
 
-	private String zalopayPaymentStatus;
+	private String vnpayPaymentStatus;
 
 }

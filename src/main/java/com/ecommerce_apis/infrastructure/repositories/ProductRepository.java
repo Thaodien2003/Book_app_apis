@@ -2,6 +2,7 @@ package com.ecommerce_apis.infrastructure.repositories;
 
 import com.ecommerce_apis.domain.entities.Category;
 import com.ecommerce_apis.domain.entities.Product;
+import com.ecommerce_apis.domain.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,17 +14,20 @@ import java.util.List;
 public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findProductByCategory(Category category);
 
-    @Query("SELECT p FROM Product p WHERE p.title like :key")
+    List<Product> findProductBySeller(User seller);
+
+    @Query("SELECT p FROM Product p WHERE p.title like :key AND p.deleted = false")
     List<Product> findByTitle(@Param("key") String title);
 
     @Query("SELECT p FROM Product p " +
             "WHERE (p.category.name = :category OR :category = '') " +
             "AND ((:minPrice IS NULL AND :maxPrice IS NULL) OR (p.discountedPrice BETWEEN :minPrice AND :maxPrice)) " +
             "AND (:minDiscount IS NULL OR p.discountPersent >= :minDiscount) " +
+            "AND p.deleted = false " +
             "ORDER BY " +
             "CASE WHEN :sort = 'price_low' THEN p.discountedPrice END ASC, " +
             "CASE WHEN :sort = 'price_high' THEN p.discountedPrice END DESC")
-    public List<Product> filterProducts(@Param("category") String category,
+    List<Product> filterProducts(@Param("category") String category,
                                         @Param("minPrice") Integer minPrice,
                                         @Param("maxPrice") Integer maxPrice,
                                         @Param("minDiscount") Integer minDiscount,

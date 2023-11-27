@@ -6,11 +6,12 @@ import com.ecommerce_apis.application.payloads.request.ReviewRequest;
 import com.ecommerce_apis.application.payloads.response.ApiResponse;
 import com.ecommerce_apis.domain.entities.*;
 import com.ecommerce_apis.domain.exceptions.UserException;
-import com.ecommerce_apis.infrastructure.repositories.UserRepository;
 import com.ecommerce_apis.domain.service.*;
 import com.ecommerce_apis.infrastructure.gateways.CartMapper;
 import com.ecommerce_apis.infrastructure.gateways.UserMapper;
+import com.ecommerce_apis.infrastructure.repositories.UserRepository;
 import com.ecommerce_apis.presentation.dtos.CartDTO;
+import com.ecommerce_apis.presentation.dtos.OrderPlaceDTO;
 import com.ecommerce_apis.presentation.dtos.UserDTO;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +22,6 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -77,46 +77,69 @@ public class UserController {
     @PostMapping("/avartar/upload/")
     public ResponseEntity<?> addAvartarUser(
             @RequestHeader("Authorization") String jwt,
-            @RequestParam("avartar") MultipartFile avartar) throws IOException, UserException {
+            @RequestParam("avartar") MultipartFile avartar) {
 
-        User user = this.userService.getProfileUser(jwt);
-        UserDTO userDTO = null;
-        if (user != null) {
-            String fileName = this.fileService.uploadImage(path, avartar);
-            user.setAvartar(fileName);
-            user.setUpdatedAt(LocalDateTime.now());
-            this.userRepository.save(user);
-            userDTO = this.userMapper.convertToDTO(user);
+        try {
+            User user = this.userService.getProfileUser(jwt);
+            UserDTO userDTO = null;
+            if (user != null) {
+                String fileName = this.fileService.uploadImage(path, avartar);
+                user.setAvartar(fileName);
+                user.setUpdatedAt(LocalDateTime.now());
+                this.userRepository.save(user);
+                userDTO = this.userMapper.convertToDTO(user);
+            }
+            assert user != null;
+            return new ResponseEntity<>(userDTO, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
-
-        return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
 
     // method to server files
     @GetMapping(value = "/avartar/{avartarName}", produces = MediaType.IMAGE_JPEG_VALUE)
     public void downloadImage(
             @PathVariable("avartarName") String avartarName,
-            HttpServletResponse response) throws IOException {
-        InputStream resource = this.fileService.getResource(path, avartarName);
-        response.setContentType(MediaType.IMAGE_JPEG_VALUE);
-        StreamUtils.copy(resource, response.getOutputStream());
+            HttpServletResponse response) {
+        try {
+            InputStream resource = this.fileService.getResource(path, avartarName);
+            response.setContentType(MediaType.IMAGE_JPEG_VALUE);
+            StreamUtils.copy(resource, response.getOutputStream());
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
     }
 
     //update user
     @PutMapping("/update/{userId}")
-    public ResponseEntity<UserDTO> updateUser(@RequestBody UserDTO userDTO,
-                                              @PathVariable String userId) throws UserException {
+    public ResponseEntity<ApiResponse> updateUser(@RequestBody UserDTO userDTO,
+                                                  @PathVariable String userId) throws UserException {
         UserDTO update = this.userService.updateUser(userDTO, userId);
-        return new ResponseEntity<>(update, HttpStatus.OK);
+        ApiResponse response = new ApiResponse();
+        response.setMessage("Update user successfully" + update);
+        response.setSuccess(true);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    //delete user
+    @DeleteMapping("/delete/{userId}")
+    public ResponseEntity<ApiResponse> deleteUser(@PathVariable String userId) throws UserException {
+
+        this.userService.deletedUser(userId);
+        ApiResponse response = new ApiResponse();
+        response.setMessage("Delete user successfully");
+        response.setSuccess(true);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 
     //find cart by user id
     @GetMapping("/cart/")
     public ResponseEntity<CartDTO> findCart(@RequestHeader("Authorization") String jwt) throws UserException {
+
         User user = userService.getProfileUser(jwt);
         Cart cart = cartService.findUserCart(user.getUser_id());
         CartDTO cartDTO = this.cartMapper.convertToDTO(cart);
-
         return new ResponseEntity<>(cartDTO, HttpStatus.OK);
     }
 
@@ -125,11 +148,11 @@ public class UserController {
     public ResponseEntity<ApiResponse> addItemToCart(@RequestBody CartItemRequest req,
                                                      @RequestHeader("Authorization") String jwt) throws UserException {
 
+
         User user = userService.getProfileUser(jwt);
         this.cartService.addCartItem(user.getUser_id(), req);
-
         ApiResponse res = new ApiResponse();
-        res.setMessage("item add to cart");
+        res.setMessage("Item added to cart");
         res.setSuccess(true);
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
@@ -142,7 +165,6 @@ public class UserController {
 
         User user = this.userService.getProfileUser(jwt);
         CartItem updateCartItem = this.cartItemService.updateCartItem(user.getUser_id(), cartItemId, cartItem);
-
         return new ResponseEntity<>(updateCartItem, HttpStatus.OK);
     }
 
@@ -152,13 +174,10 @@ public class UserController {
                                                        @RequestHeader("Authorization") String jwt) throws UserException {
 
         User user = this.userService.getProfileUser(jwt);
-
         this.cartItemService.removedCartItem(user.getUser_id(), cartItemId);
-
         ApiResponse res = new ApiResponse();
-        res.setMessage("delete item from cart");
+        res.setMessage("Delete item from cart");
         res.setSuccess(true);
-
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
@@ -166,9 +185,9 @@ public class UserController {
     @PostMapping("/order/create-order")
     public ResponseEntity<Order> createdOrder(@RequestBody Address shippingAddress,
                                               @RequestHeader("Authorization") String jwt) throws UserException {
+
         User user = this.userService.getProfileUser(jwt);
         Order order = this.orderService.createOrder(user, shippingAddress);
-        System.out.println("order : " + order);
         return new ResponseEntity<>(order, HttpStatus.CREATED);
     }
 
@@ -176,19 +195,21 @@ public class UserController {
     @SuppressWarnings("unused")
     @PostMapping("/order/{orderId}/placed")
     public ResponseEntity<Order> placesOrder(@PathVariable Long orderId,
-                                             @RequestHeader("Authorization") String jwt) throws UserException {
+                                             @RequestHeader("Authorization") String jwt,
+                                             @RequestBody OrderPlaceDTO orderPlaceDTO) throws UserException {
+
         User user = this.userService.getProfileUser(jwt);
-        Order order = this.orderService.placeOrder(orderId);
+        Order order = this.orderService.placeOrder(orderId, orderPlaceDTO);
         return new ResponseEntity<>(order, HttpStatus.OK);
+
     }
 
     //View user's order history
     @GetMapping("/order/history")
     public ResponseEntity<List<Order>> userOrderHistory(@RequestHeader("Authorization") String jwt) throws UserException {
+
         User user = this.userService.getProfileUser(jwt);
-
         List<Order> orders = this.orderService.userOrderHistory(user.getUser_id());
-
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
@@ -209,7 +230,6 @@ public class UserController {
     }
 
     //get product rating
-
     @GetMapping("/ratings/product/{productId}")
     public ResponseEntity<List<Rating>> getProductsRating(@PathVariable Long productId) {
         List<Rating> rating = this.ratingService.getProductRating(productId);
@@ -231,5 +251,4 @@ public class UserController {
         List<Review> reviews = this.reviewService.getAllReview(productId);
         return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
-
 }

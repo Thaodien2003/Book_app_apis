@@ -17,5 +17,4 @@ public class CategoryDTO {
     private String description;
 
     private String categoryImage;
-
 }

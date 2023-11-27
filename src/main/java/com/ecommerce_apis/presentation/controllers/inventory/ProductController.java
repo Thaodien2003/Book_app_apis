@@ -28,6 +28,7 @@ public class ProductController {
             @RequestParam(value = "pageSize", defaultValue = Constants.PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam(value = "sortBy", defaultValue = Constants.SORT_BY, required = false) String sortBy,
             @RequestParam(value = "sortDir", defaultValue = Constants.SORT_DIR, required = false) String sortDir) {
+
         ProductResponse allProduct = this.productService.getAllProduct(pageNumber, pageSize, sortBy, sortDir);
         return new ResponseEntity<>(allProduct, HttpStatus.OK);
     }
@@ -42,9 +43,9 @@ public class ProductController {
             @RequestParam(value = "pageSize", defaultValue = Constants.PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam String sort
     ) {
+
         Page<ProductDTO> productDTOS = this.productService.getFilterProduct(category, color, size, minPrice, maxPrice,
                                                                             minDiscount, sort, stock, pageNumber, pageSize);
-        System.out.println("Complete Product");
         return new ResponseEntity<>(productDTOS, HttpStatus.OK);
     }
 
@@ -63,4 +64,10 @@ public class ProductController {
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
+    //get product by id
+    @GetMapping("/{productId}")
+    public ResponseEntity<ProductDTO> getProductById(@PathVariable Long productId) {
+        ProductDTO productDTO = this.productService.findProductById(productId);
+        return new ResponseEntity<>(productDTO, HttpStatus.OK);
+    }
 }

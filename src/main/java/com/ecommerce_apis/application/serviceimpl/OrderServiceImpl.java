@@ -2,12 +2,14 @@ package com.ecommerce_apis.application.serviceimpl;
 
 import com.ecommerce_apis.domain.entities.*;
 import com.ecommerce_apis.domain.exceptions.ResourceNotFoundException;
+import com.ecommerce_apis.domain.exceptions.UserException;
 import com.ecommerce_apis.infrastructure.repositories.AddressRepository;
 import com.ecommerce_apis.infrastructure.repositories.OrderItemRepository;
 import com.ecommerce_apis.infrastructure.repositories.OrderRepository;
 import com.ecommerce_apis.infrastructure.repositories.UserRepository;
 import com.ecommerce_apis.domain.service.CartService;
 import com.ecommerce_apis.domain.service.OrderService;
+import com.ecommerce_apis.presentation.dtos.OrderPlaceDTO;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -100,10 +102,16 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order placeOrder(Long orderId) {
+    public Order placeOrder(Long orderId, OrderPlaceDTO orderPlaceDTO) {
         Order order = findOrderById(orderId);
         order.setOrderStatus("PLACED");
-        order.getPaymentDetails().setStatus("COMPLETED");
+        order.getPaymentDetails().setPaymentMethod(orderPlaceDTO.getOrderPlaceMethod());
+        if ("COD".equalsIgnoreCase(orderPlaceDTO.getOrderPlaceMethod())) {
+            order.getPaymentDetails().setStatus("UNPAID");
+        } else if("VNPAY".equalsIgnoreCase(orderPlaceDTO.getOrderPlaceMethod())){
+            order.getPaymentDetails().setStatus("COMPLETE");
+        }
+        order.setPlacedOrderDate(LocalDateTime.now());
         return order;
     }
 
@@ -111,24 +119,47 @@ public class OrderServiceImpl implements OrderService {
     public Order confirmedOrder(Long orderId) {
         Order order = findOrderById(orderId);
         order.setOrderStatus("CONFIRMED");
-
         return this.orderRepository.save(order);
     }
 
     @Override
-    public Order shippedOrder(Long orderId) {
+    public Order shippedOrder(Long orderId, String shipperId) throws UserException {
+        User shipper = userRepository.findById(shipperId).orElse(null);
+
+        if (shipper == null) {
+            throw new UserException("Shipper not found");
+        }
         Order order = findOrderById(orderId);
         order.setOrderStatus("SHIPPED");
+        order.setShipper(shipper);
+        order.setShippedOrderDate(LocalDateTime.now());
         return this.orderRepository.save(order);
     }
 
     @Override
-    public Order deliveredOrder(Long orderId) {
+    public Order deliveredOrder(Long orderId, String shipperId) throws UserException {
+        User shipper = userRepository.findById(shipperId).orElse(null);
+
+        if (shipper == null) {
+            throw new UserException("Shipper not found");
+        }
         Order order = findOrderById(orderId);
         order.setOrderStatus("DELIVERED");
-        order.setDeliveryDate(LocalDateTime.now());
-
+        order.setShipper(shipper);
         return this.orderRepository.save(order);
+    }
+
+    @Override
+    public Order successDelivery(Long orderId, String shipperId) throws UserException {
+        User shipper = userRepository.findById(shipperId).orElse(null);
+
+        if (shipper == null) {
+            throw new UserException("Shipper not found");
+        }
+        Order order = findOrderById(orderId);
+        order.setOrderStatus("SUCCESS");
+        order.setSuccessDeliveryDate(LocalDateTime.now());
+        return  this.orderRepository.save(order);
     }
 
     @Override

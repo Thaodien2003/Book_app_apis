@@ -30,6 +30,7 @@ public class User implements UserDetails {
     @SuppressWarnings("unused")
     private String username;
 
+    @JsonIgnore
     private String password;
 
     private String email;
@@ -38,19 +39,24 @@ public class User implements UserDetails {
 
     private String avartar;
 
+    @JsonIgnore
     private String otp;
 
+    @JsonIgnore
     private LocalDateTime otpGeneratedTime;
 
-    private String token;
+    @JsonIgnore
+    private boolean deleted;
 
-    private LocalDateTime tokenGeneratedTime;
+    @JsonIgnore
+    private LocalDateTime deletedTime;
 
     @ManyToMany
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "User_id"),
             inverseJoinColumns = @JoinColumn(name = "Role_id")
     )
+    @JsonIgnore
     private Set<Role> roles = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
@@ -70,10 +76,14 @@ public class User implements UserDetails {
     @JsonIgnore
     private List<Review> reviews = new ArrayList<>();
 
+    @JsonIgnore
     private LocalDateTime createdAt;
+
+    @JsonIgnore
     private LocalDateTime updatedAt;
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
         roles.forEach(i -> authorities.add(new SimpleGrantedAuthority(i.getName())));
@@ -91,27 +101,31 @@ public class User implements UserDetails {
         return username;
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isEnabled() {
         return true;
     }
 
-    public User(String username, String password, String email, String mobile, Set<Role> roles,
+    public User(String username, String password, String email, String mobile, Set<Role> roles, boolean deleted,
                 LocalDateTime createdAt) {
         super();
         this.username = username;
@@ -119,6 +133,7 @@ public class User implements UserDetails {
         this.email = email;
         this.mobile = mobile;
         this.roles = roles;
+        this.deleted = deleted;
         this.createdAt = createdAt;
     }
 }
