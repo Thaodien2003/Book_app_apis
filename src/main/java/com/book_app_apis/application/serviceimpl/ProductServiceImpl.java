@@ -172,10 +172,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDTO> findProductByCategory(Long categoryId) throws JsonProcessingException {
-        // Kiểm tra xem có dữ liệu trong Redis cache không
+        // check data in cache
         List<ProductDTO> productDTOs = productRedisService.getAllProducts(cacheKey);
 
-        // Nếu không có trong cache, thực hiện truy vấn cơ sở dữ liệu
         if (productDTOs == null) {
             Category category = this.categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new ResourceNotFoundException(categoryMess, categoryMessId, categoryId));
@@ -186,13 +185,13 @@ public class ProductServiceImpl implements ProductService {
                         LocaleContextHolder.getLocale());
                 logger.info(productLogInfo + "-" + categoryId + " with product" + products);
 
-                // Lọc ra sản phẩm không bị xóa
+                // fill product is not delete
                 productDTOs = products.stream()
                         .filter(product -> !product.isDeleted())
                         .map(this.productMapper::convertToDTO)
                         .collect(Collectors.toList());
 
-                // Lưu kết quả vào cache
+                // save cache
                 productRedisService.saveAllProducts(productDTOs, cacheKey);
             } else {
                 String productLogError = messageSource.getMessage("product.category.log.error", null,
@@ -217,22 +216,19 @@ public class ProductServiceImpl implements ProductService {
 
         Pageable page = PageRequest.of(pageNumber, pageSize, sort);
 
-        // Kiểm tra xem có dữ liệu trong Redis cache không
+        // check data in cache
         List<ProductDTO> productDTOs = productRedisService.getAllProducts(cacheKey);
 
-        // Nếu không có trong cache, thực hiện truy vấn cơ sở dữ liệu
         Page<Product> pageProduct = null;
         if (productDTOs == null) {
             pageProduct = this.productRepository.findAll(page);
 
             List<Product> allProducts = pageProduct.getContent();
-            // Lọc ra các sản phẩm có trường deleted là false
             productDTOs = allProducts.stream()
                     .filter(product -> !product.isDeleted())
                     .map(this.productMapper::convertToDTO)
                     .collect(Collectors.toList());
 
-            // Lưu kết quả vào cache
             productRedisService.saveAllProducts(productDTOs, cacheKey);
         }
 
@@ -252,25 +248,20 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDTO> findNewProducts() throws JsonProcessingException {
-        // Tạo key duy nhất cho mỗi truy vấn
+        //create key
         String cacheKeyNewProduct = "new_products";
 
-        // Kiểm tra xem có dữ liệu trong Redis cache không
         List<ProductDTO> newProductDTOs = productRedisService.getAllProducts(cacheKeyNewProduct);
 
-        // Nếu không có trong cache, thực hiện truy vấn cơ sở dữ liệu
         if (newProductDTOs == null) {
             List<Product> products = this.productRepository.findAll();
 
-            // Lọc những sản phẩm có trường delete là false
             List<Product> validProducts = new ArrayList<>(products.stream()
                     .filter(product -> !product.isDeleted())
                     .toList());
 
-            // Sắp xếp danh sách sản phẩm theo thời gian tạo giảm dần
             validProducts.sort(Comparator.comparing(Product::getCreatedAt).reversed());
 
-            // Chọn số lượng sản phẩm mới nhất cần lấy (ví dụ, 10 sản phẩm mới nhất)
             int numberOfNewProducts = 10;
             List<Product> newProducts = validProducts.stream()
                     .limit(numberOfNewProducts)
@@ -280,11 +271,9 @@ public class ProductServiceImpl implements ProductService {
                     LocaleContextHolder.getLocale());
             logger.info(allProductDBLogInfo);
 
-            // Chuyển đổi danh sách sản phẩm mới thành DTO
             newProductDTOs = newProducts.stream().map(this.productMapper::convertToDTO)
                     .collect(Collectors.toList());
 
-            // Lưu kết quả vào cache
             productRedisService.saveAllProducts(newProductDTOs, cacheKeyNewProduct);
         }
 
@@ -293,21 +282,17 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDTO> searchProduct(String keyword) throws JsonProcessingException {
-        // Kiểm tra xem có dữ liệu trong Redis cache không
         List<ProductDTO> searchResultDTOs = productRedisService.getAllProducts(cacheKey);
 
-        // Nếu không có trong cache, thực hiện truy vấn cơ sở dữ liệu
         if (searchResultDTOs == null) {
             List<Product> products = this.productRepository.findByTitle("%" + keyword + "%");
             String searchProductLogInfo = messageSource.getMessage("product.search.log.info", null,
                     LocaleContextHolder.getLocale());
             logger.info(searchProductLogInfo + "-" + keyword);
 
-            // Chuyển đổi danh sách sản phẩm tìm kiếm thành DTO
             searchResultDTOs = products.stream().map(this.productMapper::convertToDTO)
                     .collect(Collectors.toList());
 
-            // Lưu kết quả vào cache
             productRedisService.saveAllProducts(searchResultDTOs, cacheKey);
         }
 
@@ -377,35 +362,24 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public void updateAverageRating(long productId) {
-        // Lấy sản phẩm từ cơ sở dữ liệu
         Product product = this.productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException(productMess, productMessId, productId));
 
         if (product != null && !product.getRatings().isEmpty()) {
-            // Tính tổng điểm đánh giá
             double totalRating = product.getRatings().stream()
                     .mapToDouble(Rating::getRating)
                     .sum();
 
-            // Tính điểm trung bình
             double averageRating = totalRating / product.getRatings().size();
-
-            // Cập nhật trường numRatings
             product.setNumRatings(averageRating);
-
-            // Lưu cập nhật thời gian
             product.setUpdateAt(LocalDateTime.now());
-
-            // Lưu cập nhật vào cơ sở dữ liệu
             productRepository.save(product);
         }
     }
 
     @Scheduled(fixedRate = 300000)
     public void updateAverageRatingsForAllProducts() {
-        // Lấy tất cả sản phẩm từ cơ sở dữ liệu
         Iterable<Product> products = productRepository.findAll();
-        // Duyệt qua từng sản phẩm và cập nhật điểm trung bình
         for (Product product : products) {
             updateAverageRating(product.getId());
         }

@@ -3,6 +3,7 @@ package com.book_app_apis.presentation.controllers.auth;
 import com.book_app_apis.application.payloads.request.AuthenticationRequest;
 import com.book_app_apis.application.payloads.request.RegisterRequest;
 import com.book_app_apis.application.serviceimpl.AuthenticationService;
+import com.book_app_apis.presentation.dtos.TokenDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import org.springframework.context.MessageSource;
@@ -11,10 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -67,9 +65,9 @@ public class AuthController {
     //register account shippper
     @SuppressWarnings("deprecation")
     @PostMapping("/register/shipper")
-    public ResponseEntity<?> registerSeller(@Valid @RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<?> registerShipper(@Valid @RequestBody RegisterRequest registerRequest) {
         try {
-            ResponseEntity<?> response = authenticationService.registerSeller(registerRequest);
+            ResponseEntity<?> response = authenticationService.registerShipper(registerRequest);
             if (response.getStatusCode().is2xxSuccessful()) {
                 String successMessage = messageSource.getMessage("registration.shipper.successful",
                         null, LocaleContextHolder.getLocale());
@@ -102,4 +100,8 @@ public class AuthController {
         return ResponseEntity.ok(authenticationService.authenticate(authenticationRequest));
     }
 
+    @PostMapping("/refresh_token")
+    public ResponseEntity<?> refreshToken(@RequestBody TokenDTO tokenDTO) {
+        return ResponseEntity.ok(authenticationService.refreshToken(tokenDTO));
+    }
 }

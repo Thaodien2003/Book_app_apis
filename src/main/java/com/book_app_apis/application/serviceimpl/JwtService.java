@@ -34,7 +34,7 @@ public class JwtService {
         try {
             return Jwts.builder()
                     .setSubject(user.getEmail())
-                    .setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000))
+                    .setExpiration(new Date(System.currentTimeMillis() + 12 * 60 * 60 * 1000))
                     .claim("roles", authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                     .signWith(key).compact();
         } catch (Exception e) {

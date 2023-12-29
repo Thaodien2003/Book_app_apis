@@ -3,10 +3,15 @@ package com.book_app_apis.application.serviceimpl;
 import com.book_app_apis.application.payloads.request.AuthenticationRequest;
 import com.book_app_apis.application.payloads.request.RegisterRequest;
 import com.book_app_apis.domain.entities.Role;
+import com.book_app_apis.domain.entities.Token;
 import com.book_app_apis.domain.entities.User;
+import com.book_app_apis.domain.service.TokenService;
 import com.book_app_apis.domain.service.UserService;
 import com.book_app_apis.infrastructure.repositories.RoleCustomRepo;
+import com.book_app_apis.infrastructure.repositories.RoleRepository;
+import com.book_app_apis.infrastructure.repositories.TokenRepository;
 import com.book_app_apis.infrastructure.repositories.UserRepository;
+import com.book_app_apis.presentation.dtos.TokenDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +28,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.*;
 
+@SuppressWarnings("DuplicatedCode")
 @Service
 public class AuthenticationService {
 
@@ -31,7 +37,10 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final RoleCustomRepo roleCustomRepo;
+    private final TokenService tokenService;
+    private final TokenRepository tokenRepository;
     private final MessageSource messageSource;
+    private final RoleRepository roleRepository;
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
 
     @Autowired
@@ -40,13 +49,19 @@ public class AuthenticationService {
                                  AuthenticationManager authenticationManager,
                                  UserService userService,
                                  RoleCustomRepo roleCustomRepo,
-                                 MessageSource messageSource) {
+                                 MessageSource messageSource,
+                                 TokenService tokenService,
+                                 RoleRepository roleRepository,
+                                 TokenRepository tokenRepository) {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
         this.userService = userService;
         this.roleCustomRepo = roleCustomRepo;
         this.messageSource = messageSource;
+        this.tokenService = tokenService;
+        this.roleRepository = roleRepository;
+        this.tokenRepository = tokenRepository;
     }
 
     //register account user
@@ -92,7 +107,7 @@ public class AuthenticationService {
     }
 
     //register account shipper
-    public ResponseEntity<?> registerSeller(RegisterRequest registerRequest) {
+    public ResponseEntity<?> registerShipper(RegisterRequest registerRequest) {
         try {
             if (userRepository.findByEmail(registerRequest.getEmail()) != null) {
                 String shipperExistsLog = messageSource.getMessage("registration.shipper.already.log.warn", null,
@@ -168,8 +183,11 @@ public class AuthenticationService {
             Set<Role> roleSet = new HashSet<>();
 
             for (Role role : roles) {
-                roleSet.add(new Role(role.getName()));
-                authorities.add(new SimpleGrantedAuthority(role.getName()));
+                Role persistedRole = roleRepository.findByName(role.getName());
+                if (persistedRole != null) {
+                    roleSet.add(persistedRole);
+                    authorities.add(new SimpleGrantedAuthority(persistedRole.getName()));
+                }
             }
 
             user.setRoles(roleSet);
@@ -179,8 +197,10 @@ public class AuthenticationService {
             }
 
             String jwtAccessToken = jwtService.generateToken(user, authorities);
+            String refreshToken = UUID.randomUUID().toString();
+            tokenService.addToken(user, jwtAccessToken, refreshToken);
             logger.info("Authentication successful for user: " + user.getEmail());
-            return getStringObjectMap(jwtAccessToken, user);
+            return getStringObjectMap(jwtAccessToken,refreshToken, user);
         } catch (NoSuchElementException e) {
             String logErrorAuthen = messageSource.getMessage("authenticate.log.error", null,
                     LocaleContextHolder.getLocale());
@@ -209,9 +229,82 @@ public class AuthenticationService {
         }
     }
 
-    private static Map<String, Object> getStringObjectMap(String jwtAccessToken, User user) {
+    public Map<String, Object> refreshToken(TokenDTO tokenDTO) {
+        try {
+            Token existingToken = tokenRepository.findByRefreshToken(tokenDTO.getRefresh_token());
+
+            if (existingToken == null) {
+                String logError = messageSource.getMessage("authenticate.log.error.token", null,
+                        LocaleContextHolder.getLocale());
+                throw new NoSuchElementException(logError);
+            }
+
+            if (existingToken.isRevoked()) {
+                String logErrorRevoked = messageSource.getMessage("authenticate.log.error.token.revoked", null,
+                        LocaleContextHolder.getLocale());
+                throw new Exception(logErrorRevoked);
+            }
+
+            LocalDateTime refreshExpiration = existingToken.getRefersh_token_expired();
+            LocalDateTime currentDateTime = LocalDateTime.now();
+
+            // Kiểm tra xem thời điểm hiện tại có lớn hơn thời điểm hết hạn không
+            if (currentDateTime.isAfter(refreshExpiration)) {
+                String logExpired = messageSource.getMessage("authenticate.log.error.expired", null,
+                        LocaleContextHolder.getLocale());
+                throw new Exception(logExpired);
+            }
+
+            // get user infor from token
+            User user = existingToken.getUser();
+
+            List<Role> roles = roleCustomRepo.getRole(user.getEmail());
+
+            Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+            Set<Role> roleSet = new HashSet<>();
+
+            for (Role role : roles) {
+                Role persistedRole = roleRepository.findByName(role.getName());
+                if (persistedRole != null) {
+                    roleSet.add(persistedRole);
+                    authorities.add(new SimpleGrantedAuthority(persistedRole.getName()));
+                }
+            }
+
+            user.setRoles(roleSet);
+
+            for (Role role : roleSet) {
+                authorities.add(new SimpleGrantedAuthority(role.getName()));
+            }
+
+            // access_token new
+            String newAccessToken = jwtService.generateToken(user, authorities);
+
+            // refresh_token new
+            String newRefreshToken = UUID.randomUUID().toString();
+
+            // update
+            tokenService.addToken(user, newAccessToken, newRefreshToken);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("access_token", newAccessToken);
+            response.put("refresh_token", newRefreshToken);
+            response.put("statusCode", "OK");
+            response.put("statusCodeValue", 200);
+            return response;
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("statusCode", "BAD_REQUEST");
+            errorResponse.put("statusCodeValue", 400);
+            errorResponse.put("error", e.getMessage());
+            return errorResponse;
+        }
+    }
+
+    private static Map<String, Object> getStringObjectMap(String jwtAccessToken, String refreshToken, User user) {
         Map<String, Object> response = new HashMap<>();
         response.put("access_token", jwtAccessToken);
+        response.put("refresh_token", refreshToken);
         Map<String, Object> userMap = new HashMap<>();
         userMap.put("userId", user.getUser_id());
         userMap.put("username", user.getUsername());

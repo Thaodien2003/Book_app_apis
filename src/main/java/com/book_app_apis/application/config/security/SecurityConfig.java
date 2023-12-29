@@ -1,7 +1,6 @@
 package com.book_app_apis.application.config.security;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -26,8 +25,8 @@ import java.util.List;
 @EnableWebMvc
 public class SecurityConfig {
 
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-    private AuthenticationProvider authenticationProvider;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final AuthenticationProvider authenticationProvider;
 
     private static final String[] permitAllApis = {
             "/api/categories/**",
@@ -60,12 +59,6 @@ public class SecurityConfig {
     private static final String ADMIN = "ROLE_ADMIN";
     private static final String SHIPPER = "ROLE_SHIPPER";
 
-    @Autowired
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, AuthenticationProvider authenticationProvider) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        this.authenticationProvider = authenticationProvider;
-    }
-
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
@@ -90,10 +83,6 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        //				.logout(logout -> logout.logoutUrl("/api/v1/auth/logout")
-        //						.addLogoutHandler(logoutHandler)
-        //						.logoutSuccessHandler(
-        //								(request, response, authentication) -> SecurityContextHolder.clearContext()));
 
         return http.build();
     }

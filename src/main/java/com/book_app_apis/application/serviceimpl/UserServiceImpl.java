@@ -28,7 +28,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional
 public class UserServiceImpl implements UserService {
-
     private UserRepository userRepository;
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
@@ -165,8 +164,6 @@ public class UserServiceImpl implements UserService {
 
         existingUser.setDeleted(true);
         existingUser.setDeletedTime(LocalDateTime.now());
-
-        // Log thời điểm trước và sau khi lưu vào cơ sở dữ liệu
         logger.info("Before save: " + existingUser.getDeletedTime());
         this.userRepository.save(existingUser);
     }
@@ -175,7 +172,7 @@ public class UserServiceImpl implements UserService {
     @Scheduled(fixedRate = 7 * 24 * 60 * 60 * 1000)
     public void deleteInactiveUsers() {
         LocalDateTime currentDate = LocalDateTime.now();
-        // Gọi phương thức tìm kiếm từ repository
+
         List<User> inactiveUsers = userRepository.findInactiveUsers(currentDate);
         for (User inactiveUser : inactiveUsers) {
             try {

@@ -43,10 +43,8 @@ public class RatingServiceImpl implements RatingService {
                 .orElseThrow(() -> new ResourceNotFoundException(productMess, productMessId, request.getProductId()));
         String logInfo = messageSource.getMessage("rating.create.log.info", null,
                 LocaleContextHolder.getLocale());
-        // Kiểm tra giá trị đánh giá
         double ratingValue = request.getRating();
-        if (ratingValue <= 1 || ratingValue >= 5) {
-            // Nếu không nằm trong khoảng từ 1 đến 5, báo lỗi
+        if (ratingValue < 1 || ratingValue > 5) {
             String logErrorRating = messageSource.getMessage("rating.log.error", null, LocaleContextHolder.getLocale());
             throw new IllegalArgumentException(logErrorRating);
         }

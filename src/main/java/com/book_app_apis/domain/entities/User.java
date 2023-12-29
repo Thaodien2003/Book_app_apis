@@ -76,6 +76,10 @@ public class User implements UserDetails {
     @JsonIgnore
     private List<Review> reviews = new ArrayList<>();
 
+    @OneToOne(mappedBy = "user")
+    @JsonIgnore
+    private Token tokens;
+
     @JsonIgnore
     private LocalDateTime createdAt;
 
