@@ -9,10 +9,11 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@SuppressWarnings("SqlNoDataSourceInspection")
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
 	User findByEmail(String email);
-
+	@SuppressWarnings("SqlDialectInspection")
 	@Query(value = "SELECT * FROM users u WHERE u.deleted = true AND DATEDIFF(:currentTime, u.deleted_time) > 20", nativeQuery = true)
 	List<User> findInactiveUsers(@Param("currentTime") LocalDateTime currentTime);
 }

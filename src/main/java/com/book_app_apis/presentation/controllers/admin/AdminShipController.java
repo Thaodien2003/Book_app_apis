@@ -1,4 +1,4 @@
-package com.book_app_apis.presentation.controllers.shipper;
+package com.book_app_apis.presentation.controllers.admin;
 
 import com.book_app_apis.domain.entities.Order;
 import com.book_app_apis.domain.entities.User;
@@ -9,13 +9,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RestController("/api/shipper")
-public class ShipperController {
+@RestController("/api/admin")
+public class AdminShipController {
 
     private final OrderService orderService;
     private final UserService userService;
 
-    public ShipperController(OrderService orderService, UserService userService) {
+    public AdminShipController(OrderService orderService, UserService userService) {
         this.userService = userService;
         this.orderService = orderService;
     }

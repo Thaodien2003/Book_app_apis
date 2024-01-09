@@ -2,6 +2,7 @@ package com.book_app_apis.application.serviceimpl;
 
 import com.book_app_apis.application.payloads.request.AuthenticationRequest;
 import com.book_app_apis.application.payloads.request.RegisterRequest;
+import com.book_app_apis.application.payloads.response.RegisterResponse;
 import com.book_app_apis.domain.entities.Role;
 import com.book_app_apis.domain.entities.Token;
 import com.book_app_apis.domain.entities.User;
@@ -17,8 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -65,86 +64,43 @@ public class AuthenticationService {
     }
 
     //register account user
-    public ResponseEntity<?> register(RegisterRequest registerRequest) {
+    public RegisterResponse register(RegisterRequest registerRequest) {
         try {
             if (userRepository.findByEmail(registerRequest.getEmail()) != null) {
                 String userExistsLog = messageSource.getMessage("registration.user.already.log.warn", null,
                         LocaleContextHolder.getLocale());
                 String userExists = messageSource.getMessage("registration.user.already", null,
                         LocaleContextHolder.getLocale());
+                String statusFailed = messageSource.getMessage("status.failed", null, LocaleContextHolder.getLocale());
                 logger.warn(userExistsLog);
-                throw new IllegalArgumentException(userExists + registerRequest.getEmail());
+
+                return new RegisterResponse(statusFailed, userExists);
+            } else {
+                User user = new User(
+                        registerRequest.getUser_name(),
+                        registerRequest.getPassword(),
+                        registerRequest.getEmail(),
+                        registerRequest.getMobile(),
+                        new HashSet<>(),
+                        false,
+                        LocalDateTime.now()
+                );
+                userService.saveUser(user);
+                userService.addToUser(registerRequest.getEmail(), "ROLE_USER"); // Default role
+
+                String userSuccessMessage = messageSource.getMessage("registration.user.successful", null,
+                        LocaleContextHolder.getLocale());
+                String statusSuccess = messageSource.getMessage("status.success", null, LocaleContextHolder.getLocale());
+
+                return new RegisterResponse(statusSuccess, userSuccessMessage);
             }
-
-            User user = new User(
-                    registerRequest.getUser_name(),
-                    registerRequest.getPassword(),
-                    registerRequest.getEmail(),
-                    registerRequest.getMobile(),
-                    new HashSet<>(),
-                    false,
-                    LocalDateTime.now()
-            );
-            userService.saveUser(user);
-            userService.addToUser(registerRequest.getEmail(), "ROLE_USER"); // Default role
-
-            String userSucessMessage = messageSource.getMessage("registration.user.successful", null,
-                    LocaleContextHolder.getLocale());
-            User savedUser = userRepository.findByEmail(registerRequest.getEmail());
-            logger.info(userSucessMessage + " - " + savedUser);
-            return ResponseEntity.ok(savedUser);
-        } catch (IllegalArgumentException e) {
-            String badRequest = messageSource.getMessage("request.bad.request.warn", null,
-                    LocaleContextHolder.getLocale());
-            logger.error(badRequest + e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
-            String serverError = messageSource.getMessage("request.server.warn", null,
-                    LocaleContextHolder.getLocale());
-            logger.error(serverError + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
-    }
-
-    //register account shipper
-    public ResponseEntity<?> registerShipper(RegisterRequest registerRequest) {
-        try {
-            if (userRepository.findByEmail(registerRequest.getEmail()) != null) {
-                String shipperExistsLog = messageSource.getMessage("registration.shipper.already.log.warn", null,
-                        LocaleContextHolder.getLocale());
-                String shipperExists = messageSource.getMessage("registration.shipper.already", null,
-                        LocaleContextHolder.getLocale());
-                logger.warn(shipperExistsLog);
-                throw new IllegalArgumentException(shipperExists + registerRequest.getEmail());
-            }
-
-            User user = new User(
-                    registerRequest.getUser_name(),
-                    registerRequest.getPassword(),
-                    registerRequest.getEmail(),
-                    registerRequest.getMobile(),
-                    new HashSet<>(),
-                    false,
-                    LocalDateTime.now()
-            );
-            userService.saveUser(user);
-
-            userService.addToUser(registerRequest.getEmail(), "ROLE_SHIPPER"); // Default role
-            String shipperSucessMessage = messageSource.getMessage("registration.shipper.successful", null,
-                    LocaleContextHolder.getLocale());
-            User savedUser = userRepository.findByEmail(registerRequest.getEmail());
-            logger.info(shipperSucessMessage + " - " + savedUser);
-            return ResponseEntity.ok(savedUser);
-        } catch (IllegalArgumentException e) {
-            String badRequest = messageSource.getMessage("request.bad.request.warn", null,
-                    LocaleContextHolder.getLocale());
-            logger.error(badRequest + e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
+        catch (Exception e) {
             String serverError = messageSource.getMessage("request.server.warn", null,
                     LocaleContextHolder.getLocale());
+            String statusFailed = messageSource.getMessage("status.failed", null, LocaleContextHolder.getLocale());
             logger.error(serverError + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            return new RegisterResponse(statusFailed, serverError);
         }
     }
 

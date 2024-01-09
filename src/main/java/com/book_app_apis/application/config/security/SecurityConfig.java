@@ -49,8 +49,6 @@ public class SecurityConfig {
 
     private static final String[] anyAuthorityAdminApis = {"/api/admin/**"};
 
-    private static final String[] anyAuthorityShipperApis = {"/api/shipper/**"};
-
     private static final String[] corsReact = {
             "http://localhost:3000",
     };
@@ -77,7 +75,6 @@ public class SecurityConfig {
                         .requestMatchers(apiDoc).permitAll()
                         .requestMatchers(anyAuthorityUserApis).hasAnyAuthority(USER)
                         .requestMatchers(anyAuthorityAdminApis).hasAnyAuthority(ADMIN)
-                        .requestMatchers(anyAuthorityShipperApis).hasAnyAuthority(SHIPPER)
                         .anyRequest()
                         .authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
